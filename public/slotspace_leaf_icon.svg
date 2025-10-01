@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" aria-labelledby="title desc" role="img">
+  <title>SlotSpace Leaf Calendar Icon</title>
+  <desc>Rounded calendar outline with a circular tab and a stylized leaf inside, gradient green.</desc>
+  <defs>
+    <linearGradient id="gGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#3ecf63"/>
+      <stop offset="100%" stop-color="#1aa34a"/>
+    </linearGradient>
+    <linearGradient id="sGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2fb85a"/>
+      <stop offset="100%" stop-color="#15893f"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Calendar rounded rectangle (stroke) -->
+  <g transform="translate(64,128)">
+    <rect x="0" y="96" rx="80" ry="80" width="896" height="704" fill="none" stroke="url(#gGrad)" stroke-width="72" />
+    <!-- Top circular tab -->
+    <circle cx="448" cy="40" r="64" fill="url(#gGrad)" />
+    <!-- Inner rounded rect background (white) -->
+    <rect x="48" y="160" rx="48" ry="48" width="800" height="576" fill="#ffffff" />
+    <!-- Leaf (centered) -->
+    <g transform="translate(256,240) scale(1.0)">
+      <path d="M256 64c-88 0-192 48-256 152 64 104 168 152 256 152 88 0 192-48 256-152C448 112 344 64 256 64z" 
+            transform="translate(0,0) scale(0.9) translate(30,20)"
+            fill="url(#sGrad)"/>
+      <!-- Leaf vein -->
+      <path d="M196 200c40-45 120-140 160-180" transform="translate(0,0) scale(0.9) translate(30,20)"
+            stroke="#ffffff" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+    </g>
+  </g>
+</svg>

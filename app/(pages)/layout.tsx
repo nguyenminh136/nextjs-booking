@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -14,12 +16,33 @@ import {
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { ModeToggle } from "@/components/theme-toggle-button";
+import { selectNavMain } from "@/lib/features/navigation/sideBarSlice";
+import { useAppSelector } from "@/lib/hooks";
 
 export default function RootLayout({
   children
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const navMain = useAppSelector(selectNavMain);
+  const breadcrumb: {
+    level1: { url: string; title: string };
+    level2: string;
+  } = {
+    level1: { url: "", title: "" },
+    level2: ""
+  };
+  navMain.forEach(item => {
+    if (item.isActive) {
+      breadcrumb.level1.url = item.url;
+      breadcrumb.level1.title = item.title;
+    }
+    if (item.items) {
+      item.items.forEach(subitem => {
+        if (subitem.isActive) breadcrumb.level2 = subitem.title;
+      });
+    }
+  });
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -34,14 +57,18 @@ export default function RootLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Building Your Application
+                  <BreadcrumbLink href={breadcrumb.level1.url}>
+                    {breadcrumb.level1.title}
                   </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-                </BreadcrumbItem>
+                {breadcrumb.level2 && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{breadcrumb.level2}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
