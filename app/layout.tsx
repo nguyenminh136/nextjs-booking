@@ -1,4 +1,5 @@
 import { ThemeProvider } from "@/components/theme-provider";
+import { SessionProvider } from "@/components/session-provider";
 import { inter, spaceGrotesk } from "./fonts";
 import { StoreProvider } from "./StoreProvider";
 
@@ -18,14 +19,16 @@ export default function RootLayout({
       >
         <head />
         <body>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {children}
-          </ThemeProvider>
+          <SessionProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="system"
+              enableSystem
+              disableTransitionOnChange
+            >
+              {children}
+            </ThemeProvider>
+          </SessionProvider>
         </body>
       </html>
     </StoreProvider>

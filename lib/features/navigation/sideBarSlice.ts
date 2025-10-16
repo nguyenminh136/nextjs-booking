@@ -3,9 +3,9 @@ import { createAppSlice } from "@/lib/createAppSlice";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 export interface User {
-  name: string;
-  email: string;
-  avatarUrl: string;
+  name?: string;
+  email?: string;
+  avatarUrl?: string;
 }
 
 export interface NavItem {

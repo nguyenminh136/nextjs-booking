@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useSession } from "next-auth/react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -19,6 +20,7 @@ import {
 } from "@/lib/features/navigation/sideBarSlice";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession();
   const user = useAppSelector(selectUser);
   const navMain = useAppSelector(selectNavMain);
   const teams = useAppSelector(selectTeams);
@@ -31,7 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user} />
+        <NavUser user={session?.user || {}} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
