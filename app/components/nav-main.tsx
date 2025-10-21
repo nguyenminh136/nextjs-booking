@@ -73,7 +73,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                 onClick={() => dispatch(setActive(item.title))}
               >
                 {item.icon && <DynamicIcon name={item.icon} />}
-                <Link href={item.url}>
+                <Link href={item.url} prefetch className="flex w-full">
                   <span>{item.title}</span>
                 </Link>
               </SidebarMenuButton>

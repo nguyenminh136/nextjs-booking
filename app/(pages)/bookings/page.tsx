@@ -1,41 +1,12 @@
-"use client";
-
-import { useSession } from "next-auth/react";
+import React from "react";
+import Link from "next/link";
 import BookingCard from "@/components/booking/booking-card";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import { getBookings } from "@/services/booking.service";
 import { Booking } from "@/interface/Booking";
 
-export default function BookingsPage() {
-  const { data: session, status } = useSession();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-
-  useEffect(() => {
-    if (status === "authenticated") {
-      const fetchData = async () => {
-        const res = await fetch("/api/booking", {
-          headers: {
-            Authorization: `Bearer ${session?.accessToken}`
-          },
-          cache: "no-store"
-        });
-
-        if (!res.ok) {
-          console.error("Fetch failed:", res.status, await res.text());
-          return;
-        }
-
-        const data = await res.json();
-        setBookings(data);
-      };
-
-      fetchData();
-    }
-  }, [status, session]);
-
-  if (status === "loading") return <p>Loading...</p>;
-  if (status === "unauthenticated") return <p>Please login first.</p>;
+export default async function BookingsPage() {
+  const bookings = await getBookings();
 
   return (
     <div className="p-6">
