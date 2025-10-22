@@ -9,7 +9,7 @@ export const authOptions: AuthOptions = {
       issuer: process.env.AUTH0_ISSUER!,
       authorization: {
         params: {
-          audience: process.env.AUTH0_AUDIENCE,
+          audience: process.env.AUTH0_AUDIENCE
         }
       },
       profile(profile) {
@@ -28,13 +28,20 @@ export const authOptions: AuthOptions = {
   session: { strategy: "jwt" },
   callbacks: {
     async jwt({ token, account }) {
-      if (account?.access_token) token.accessToken = account.access_token;
+      if (account) {
+        token.expiresAt =
+          Math.floor(Date.now() / 1000) + Number(account.expires_in ?? 3600);
+        if (account?.access_token) token.accessToken = account.access_token;
+      }
+      if (token.expiresAt && Date.now() / 1000 > Number(token.expiresAt)) {
+        token.error = "AccessTokenExpired";
+      }
       return token;
     },
     async session({ session, token }) {
-      if (token?.accessToken) {
-        session.accessToken = token.accessToken as string;
-      }
+      session.accessToken = token.accessToken as string;
+      session.expiresAt = token.expiresAt as number;
+      session.error = token.error as string | undefined;
       return session;
     }
   }

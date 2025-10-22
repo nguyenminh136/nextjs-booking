@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
+import SessionWatcher from "@/components/session-watcher";
 import { inter, spaceGrotesk } from "./fonts";
 import { StoreProvider } from "./StoreProvider";
 
@@ -20,6 +21,7 @@ export default function RootLayout({
         <head />
         <body>
           <SessionProvider>
+            <SessionWatcher />
             <ThemeProvider
               attribute="class"
               defaultTheme="system"

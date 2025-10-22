@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { User } from "next-auth";
+import { signOut } from "next-auth/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -42,9 +43,11 @@ export function NavUser({ user }: { user: User }) {
             >
               <Avatar className="h-8 w-8 rounded-lg">
                 <AvatarImage
-                  src={`/api/avatar?url=${encodeURIComponent(
-                    user?.image ?? "/default-avatar.png"
-                  )}`}
+                  src={
+                    user?.image
+                      ? `/api/avatar?url=${encodeURIComponent(user?.image)}`
+                      : "/default-avatar.png"
+                  }
                   alt={user?.name ?? "User Avatar"}
                 />
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
@@ -102,7 +105,7 @@ export function NavUser({ user }: { user: User }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
               <LogOut />
               Log out
             </DropdownMenuItem>
