@@ -10,8 +10,10 @@ const getBookings = async () => {
 
   const res = await fetch(`${process.env.API_URL}/bookings`, {
     headers: {
-      Authorization: `Bearer ${session.accessToken}`
-    }
+      Authorization: `Bearer ${session.accessToken}`,
+      "Content-Type": "application/json"
+    },
+    cache: "no-store"
   });
 
   const data = await res.json();

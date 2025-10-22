@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
-import { SectionCardSkeleton } from "@/components/skeletons";
+import { SectionCardSkeleton } from "@/components/skeletons/section-card.skeleton";
 
 import data from "./data.json";
 

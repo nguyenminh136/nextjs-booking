@@ -1,13 +1,10 @@
-import React from "react";
+import React, { Suspense } from "react";
 import Link from "next/link";
-import BookingCard from "@/components/booking/booking-card";
 import { Button } from "@/components/ui/button";
-import { getBookings } from "@/services/booking.service";
-import { Booking } from "@/interface/Booking";
+import { BookingCardListSkeleton } from "@/components/skeletons/booking-card-list.skeleton";
+import BookingsList from "@/components/booking/booking-list";
 
 export default async function BookingsPage() {
-  const bookings = await getBookings();
-
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -18,11 +15,9 @@ export default async function BookingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {bookings.length > 0 ? (
-          bookings.map((b: Booking) => <BookingCard key={b.id} booking={b} />)
-        ) : (
-          <p>No bookings found.</p>
-        )}
+        <Suspense fallback={<BookingCardListSkeleton />}>
+          <BookingsList />
+        </Suspense>
       </div>
     </div>
   );
