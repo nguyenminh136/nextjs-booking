@@ -29,13 +29,13 @@ export const authOptions: AuthOptions = {
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
-        token.expiresAt =
-          Math.floor(Date.now() / 1000) + Number(account.expires_in ?? 3600);
+        token.expiresAt = Number(account.expires_at);
         if (account?.access_token) token.accessToken = account.access_token;
       }
       if (token.expiresAt && Date.now() / 1000 > Number(token.expiresAt)) {
         token.error = "AccessTokenExpired";
       }
+      console.log(token);
       return token;
     },
     async session({ session, token }) {

@@ -1,3 +1,4 @@
+import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SessionProvider } from "@/components/session-provider";
 import SessionWatcher from "@/components/session-watcher";
@@ -29,6 +30,7 @@ export default function RootLayout({
               disableTransitionOnChange
             >
               {children}
+              <Toaster />
             </ThemeProvider>
           </SessionProvider>
         </body>
