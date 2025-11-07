@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { InjectManifest } from "workbox-webpack-plugin";
 
 const nextConfig: NextConfig = {
   async redirects() {
@@ -9,6 +10,18 @@ const nextConfig: NextConfig = {
         permanent: true
       }
     ];
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.plugins.push(
+        new InjectManifest({
+          swSrc: "workbox/sw-template.js",
+          swDest: "public/sw.js",
+          maximumFileSizeToCacheInBytes: 10 * 1024 * 1024
+        })
+      );
+    }
+    return config;
   },
   images: {
     remotePatterns: [
