@@ -6,10 +6,15 @@ importScripts(
 if (workbox) {
   console.log("✅ Workbox loaded");
 
-  // ✅ Precaching các asset được build (Next.js static chunks, css, v.v)
+  // Precaching các asset được build (Next.js static chunks, css, v.v)
   workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
 
-  // ✅ Cache các trang HTML (App Router)
+  workbox.routing.registerRoute(
+    ({ url }) => url.pathname.endsWith("manifest.json"),
+    new workbox.strategies.NetworkOnly()
+  );
+
+  // Cache các trang HTML (App Router)
   workbox.routing.registerRoute(
     ({ request }) => request.mode === "navigate",
     new workbox.strategies.NetworkFirst({
@@ -23,7 +28,7 @@ if (workbox) {
     })
   );
 
-  // ✅ Cache static assets (images, fonts, js, css)
+  // Cache static assets (images, fonts, js, css)
   workbox.routing.registerRoute(
     ({ request }) =>
       ["style", "script", "image", "font"].includes(request.destination),
@@ -32,7 +37,7 @@ if (workbox) {
     })
   );
 
-  // ✅ Fallback offline.html nếu offline hoàn toàn
+  // Fallback offline.html nếu offline hoàn toàn
   workbox.routing.setCatchHandler(async ({ event }) => {
     if (event.request.destination === "document") {
       const cachedResponse = await caches.match("/offline.html");

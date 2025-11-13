@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build && tsx scripts/generate-sw.ts",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "info": "next info"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

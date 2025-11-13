@@ -1,4 +1,4 @@
-self.onmessage = (event: MessageEvent) => {
+self.onmessage = event => {
   const { type, payload } = event.data;
   if (type !== "heavyComputation") return;
 
@@ -11,7 +11,7 @@ self.onmessage = (event: MessageEvent) => {
     sum += Math.sqrt(i);
     if (i % stepSize === 0) {
       const progress = Math.round((i / iterations) * 100);
-      (self as DedicatedWorkerGlobalScope).postMessage({
+      self.postMessage({
         type: "progress",
         progress
       });
@@ -19,11 +19,9 @@ self.onmessage = (event: MessageEvent) => {
   }
 
   const end = performance.now();
-  (self as DedicatedWorkerGlobalScope).postMessage({
+  self.postMessage({
     type: "result",
     result: sum,
     duration: (end - start).toFixed(2)
   });
 };
-
-export {};

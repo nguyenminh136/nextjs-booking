@@ -1,10 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 
-// 👇 kiểu đặc biệt: import.meta.url + new URL(...)
-// Cách này tương thích Turbopack & bundler hiện đại (không cần file public)
-const workerUrl = new URL("@/workers/heavy-worker.ts", import.meta.url);
-
 export function useHeavyComputation() {
   const [result, setResult] = useState<number | null>(null);
   const [duration, setDuration] = useState<string>("");
@@ -12,7 +8,7 @@ export function useHeavyComputation() {
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(workerUrl, { type: "module" });
+    workerRef.current = new Worker("/workers/heavy-worker.js");
     workerRef.current.onmessage = e => {
       const { type, result, duration, progress } = e.data;
       if (type === "progress") setProgress(progress);
