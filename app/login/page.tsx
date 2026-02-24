@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Card className="w-[380px] shadow-lg rounded-2xl border border-gray-200 bg-white">
+      <Card className="w-95 shadow-lg rounded-2xl border border-gray-200 bg-white">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-semibold text-gray-800">
             Sign in to your account
