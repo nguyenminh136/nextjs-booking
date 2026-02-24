@@ -33,7 +33,7 @@ export default function LoginPage() {
           </Button>
 
           <p className="text-sm text-center text-gray-500 mt-4">
-            Don’t have an account?{" "}
+            Don't have an account?{" "}
             <span
               onClick={() =>
                 signIn("auth0", {
