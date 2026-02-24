@@ -4,10 +4,11 @@ import { SessionProvider } from "@/components/session-provider";
 import SessionWatcher from "@/components/session-watcher";
 import { inter, spaceGrotesk } from "./fonts";
 import { StoreProvider } from "./StoreProvider";
+import QueryProvider from "./QueryProvider";
 import type { Metadata } from "next";
+import ServiceWorkerRegister from "./components/service-worker-register";
 
 import "./globals.css";
-import ServiceWorkerRegister from "./components/service-worker-register";
 
 export const metadata: Metadata = {
   title: "NextJS Booking",
@@ -30,19 +31,21 @@ export default function RootLayout({
       >
         <head />
         <body>
-          <SessionProvider>
-            <SessionWatcher />
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="system"
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-              <ServiceWorkerRegister />
-              <Toaster />
-            </ThemeProvider>
-          </SessionProvider>
+          <QueryProvider>
+            <SessionProvider>
+              <SessionWatcher />
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+                <ServiceWorkerRegister />
+                <Toaster />
+              </ThemeProvider>
+            </SessionProvider>
+          </QueryProvider>
         </body>
       </html>
     </StoreProvider>

@@ -15,13 +15,11 @@ import {
 import { useAppSelector } from "@/lib/hooks";
 import {
   selectNavMain,
-  selectTeams,
-  selectUser
+  selectTeams
 } from "@/lib/features/navigation/sideBarSlice";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: session } = useSession();
-  const user = useAppSelector(selectUser);
   const navMain = useAppSelector(selectNavMain);
   const teams = useAppSelector(selectTeams);
   return (

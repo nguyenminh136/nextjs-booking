@@ -1,8 +1,6 @@
 import { injectManifest } from "workbox-build";
-import path from "path";
 
 async function buildSW() {
-  const swDest = path.join(__dirname, "../public/sw.js");
 
   const { count, size, warnings } = await injectManifest({
     swSrc: "workbox/sw-template.js",
