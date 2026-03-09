@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
 import StudioSearchFilter from "./studio-search-filter";
 import StudioList from "./studio-list";
 import { Studio } from "@/interface/Studio";

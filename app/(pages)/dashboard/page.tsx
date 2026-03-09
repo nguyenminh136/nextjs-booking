@@ -14,9 +14,7 @@ export default async function Page() {
           <Suspense fallback={<SectionCardSkeleton />}>
             <SectionCards />
           </Suspense>
-          <div className="px-4 lg:px-6">
-            <ChartAreaInteractive />
-          </div>
+          <ChartAreaInteractive />
           <DataTable data={data} />
         </div>
       </div>

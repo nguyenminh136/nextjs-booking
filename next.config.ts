@@ -19,7 +19,11 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "avatars.githubusercontent.com" // nếu bạn có login GitHub
+        hostname: "avatars.githubusercontent.com"
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com"
       }
     ]
   }
