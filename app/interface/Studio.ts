@@ -16,4 +16,12 @@ export interface Studio {
     startDate: string;
     endDate: string;
   };
+  description?: string;
+  rules?: string[];
+  cancellationPolicy?: string;
+  ownerContact?: {
+    name: string;
+    email: string;
+    phone: string;
+  };
 }

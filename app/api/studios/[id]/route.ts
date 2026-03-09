@@ -1,10 +1,9 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
 import { NextRequest, NextResponse } from "next/server";
-import { Studio } from "@/interface/Studio";
 
-// Mock data for studios - in production, this would come from a database
-const MOCK_STUDIOS: Studio[] = [
+// Mock data - same as in parent route
+const MOCK_STUDIOS = [
   {
     id: "studio-1",
     name: "Downtown Recording Studio",
@@ -26,6 +25,12 @@ const MOCK_STUDIOS: Studio[] = [
     rules: ["No smoking inside", "Respect quiet hours after 10 PM", "Proper handling of equipment required", "Book cancellations must be made 24 hours in advance"],
     cancellationPolicy: "Free cancellation up to 24 hours before booking. 50% refund between 12-24 hours. Non-refundable within 12 hours.",
     ownerContact: { name: "John Smith", email: "john@downtownstudio.com", phone: "+1-555-0101" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1501612546272-f3fdca59fce0?w=800&h=600&fit=crop",
+    ],
   },
   {
     id: "studio-2",
@@ -48,6 +53,11 @@ const MOCK_STUDIOS: Studio[] = [
     rules: ["Arrive 15 minutes early", "Bring your own cables if possible", "No food or drinks near equipment"],
     cancellationPolicy: "Free cancellation up to 48 hours before booking. 25% refund between 24-48 hours. Non-refundable within 24 hours.",
     ownerContact: { name: "Sarah Johnson", email: "sarah@creativesoundlab.com", phone: "+1-555-0102" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop",
+    ],
   },
   {
     id: "studio-3",
@@ -69,7 +79,14 @@ const MOCK_STUDIOS: Studio[] = [
     description: "Premium recording facility with world-class equipment and experienced sound engineers available for session support.",
     rules: ["Professional conduct required", "Equipment handling training provided", "Booking confirmation 72 hours in advance"],
     cancellationPolicy: "Free cancellation up to 14 days. 25% refund 7-14 days. 50% refund 3-7 days. Non-refundable within 3 days.",
-    ownerContact: { name: "Michael Chen", email: "michael@professionalmusiichub.com", phone: "+1-555-0103" },
+    ownerContact: { name: "Michael Chen", email: "michael@professionalmusicchub.com", phone: "+1-555-0103" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1501612546272-f3fdca59fce0?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop",
+    ],
   },
   {
     id: "studio-4",
@@ -92,6 +109,10 @@ const MOCK_STUDIOS: Studio[] = [
     rules: ["Keep volume reasonable", "No outside food except light snacks", "Return equipment as found"],
     cancellationPolicy: "Free cancellation up to 12 hours. Non-refundable within 12 hours.",
     ownerContact: { name: "DJ Marcus", email: "marcus@urbanbeat.com", phone: "+1-555-0104" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+    ],
   },
   {
     id: "studio-5",
@@ -114,6 +135,12 @@ const MOCK_STUDIOS: Studio[] = [
     rules: ["Must provide own engineer or hire from our list", "Strict noise ordinance compliance", "Equipment deposit required"],
     cancellationPolicy: "Free cancellation up to 7 days. 50% refund 3-7 days. Non-refundable within 3 days.",
     ownerContact: { name: "Dr. Lisa Wang", email: "lisa@eliterecording.com", phone: "+1-555-0105" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1501612546272-f3fdca59fce0?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop",
+    ],
   },
   {
     id: "studio-6",
@@ -136,10 +163,18 @@ const MOCK_STUDIOS: Studio[] = [
     rules: ["Respect neighboring spaces", "Clean up after session", "Report any equipment issues immediately"],
     cancellationPolicy: "Free cancellation up to 24 hours. 50% refund within 24 hours.",
     ownerContact: { name: "Alex Rivera", email: "alex@bayareasound.com", phone: "+1-555-0106" },
+    galleryImages: [
+      "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1519415537368-c53beca7f7f1?w=800&h=600&fit=crop",
+      "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=800&h=600&fit=crop",
+    ],
   },
 ];
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -150,79 +185,19 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const searchParams = request.nextUrl.searchParams;
-    const search = searchParams.get("search")?.toLowerCase() || "";
-    const city = searchParams.get("city")?.toLowerCase() || "";
-    const capacity = searchParams.get("capacity");
-    const equipment = searchParams.get("equipment")?.split(",") || [];
-    const priceMin = searchParams.get("priceMin");
-    const priceMax = searchParams.get("priceMax");
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "12");
+    const studioId = params.id;
+    const studio = MOCK_STUDIOS.find((s) => s.id === studioId);
 
-    let filtered = MOCK_STUDIOS;
-
-    // Filter by search (name or address)
-    if (search) {
-      filtered = filtered.filter(
-        (studio) =>
-          studio.name.toLowerCase().includes(search) ||
-          studio.address.toLowerCase().includes(search)
+    if (!studio) {
+      return NextResponse.json(
+        { error: "Studio not found" },
+        { status: 404 }
       );
     }
 
-    // Filter by city
-    if (city) {
-      filtered = filtered.filter(
-        (studio) => studio.city?.toLowerCase() === city
-      );
-    }
-
-    // Filter by capacity
-    if (capacity) {
-      const minCapacity = parseInt(capacity);
-      filtered = filtered.filter(
-        (studio) => (studio.capacity || 0) >= minCapacity
-      );
-    }
-
-    // Filter by equipment
-    if (equipment.length > 0) {
-      filtered = filtered.filter((studio) =>
-        equipment.some((eq) =>
-          studio.equipment?.some(
-            (studioEq) => studioEq.toLowerCase() === eq.toLowerCase()
-          )
-        )
-      );
-    }
-
-    // Filter by price range
-    if (priceMin || priceMax) {
-      filtered = filtered.filter((studio) => {
-        const price = parseFloat(studio.pricePerHour || "0");
-        if (priceMin && price < parseFloat(priceMin)) return false;
-        if (priceMax && price > parseFloat(priceMax)) return false;
-        return true;
-      });
-    }
-
-    // Pagination
-    const total = filtered.length;
-    const start = (page - 1) * limit;
-    const end = start + limit;
-    const studios = filtered.slice(start, end);
-    const hasNextPage = end < total;
-
-    return NextResponse.json({
-      studios,
-      total,
-      page,
-      limit,
-      hasNextPage,
-    });
+    return NextResponse.json(studio);
   } catch (error: any) {
-    console.error("Error fetching studios:", error);
+    console.error("Error fetching studio:", error);
     return NextResponse.json(
       { error: error.message || "Failed to fetch" },
       { status: 500 }

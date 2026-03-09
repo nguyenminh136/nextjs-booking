@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import { Star, MapPin, Users, Volume2 } from "lucide-react";
 import { Studio } from "@/interface/Studio";
@@ -129,9 +130,11 @@ export default function StudioCard({ studio }: StudioCardProps) {
         </div>
 
         {/* CTA Button */}
-        <button className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 transition-colors">
-          View Details
-        </button>
+        <Link href={`/studios/${studio.id}`}>
+          <button className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white hover:bg-blue-700 transition-colors">
+            View Details
+          </button>
+        </Link>
       </div>
     </div>
   );
