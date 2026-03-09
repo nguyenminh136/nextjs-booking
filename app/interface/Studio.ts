@@ -5,4 +5,15 @@ export interface Studio {
   pricePerHour?: string;
   imageUrl?: string;
   createdAt: string;
+  capacity?: number;
+  rating?: number;
+  reviewCount?: number;
+  equipment?: string[];
+  features?: string[];
+  city?: string;
+  availabilityDate?: string;
+  availability?: {
+    startDate: string;
+    endDate: string;
+  };
 }
