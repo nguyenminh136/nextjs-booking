@@ -91,7 +91,7 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
       const endHours = hours + Math.floor(endMinutes / 60);
       const endTime = `${String(endHours).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
-      // Validate booking against current state
+      // Validate slot availability before redirecting
       const response = await fetch("/api/bookings/validate", {
         method: "POST",
         headers: {
@@ -122,9 +122,13 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
         return;
       }
 
-      // Show success message
-      alert(`Successfully booked: ${format(selectedDate, "MMM d, yyyy")} at ${selectedSlot}\n\nLock ID: ${validationResult.lockId}`);
-      setSelectedSlot(null);
+      // Redirect to booking form with selected slot details
+      const bookingDate = format(selectedDate, "yyyy-MM-dd");
+      const slotStart = `${bookingDate}T${selectedSlot}:00`;
+      const slotEnd = `${bookingDate}T${endTime}:00`;
+      
+      // Use window.location for client-side navigation that persists state
+      window.location.href = `/bookings/new?studioId=${studioId}&startTime=${encodeURIComponent(slotStart)}&endTime=${encodeURIComponent(slotEnd)}`;
     } catch (error) {
       console.error("Error booking slot:", error);
       setBookingError("Failed to book slot. Please try again.");
@@ -269,7 +273,7 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
         className="w-full"
         size="lg"
       >
-        {isLoading || isBooking ? "Processing..." : "Reserve Slot"}
+        {isLoading || isBooking ? "Processing..." : "Continue to Booking Details"}
       </Button>
 
       {/* Note */}
