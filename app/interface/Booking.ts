@@ -6,7 +6,13 @@ export interface Booking {
   startTime: string;
   endTime: string;
   note?: string;
+  purpose?: string;
+  attendeesCount?: number;
+  paymentMethod?: "online" | "pay_on_site";
   user: User;
   studio: Studio;
-  status: "pending" | "confirmed" | "canceled";
+  status: "pending_payment" | "confirmed" | "canceled";
+  confirmationToken?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
