@@ -78,7 +78,7 @@ function generateAvailableSlots(
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -93,7 +93,7 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams;
     const date = searchParams.get("date");
     const granularity = (searchParams.get("granularity") as "30m" | "1h") || "1h";
-    const studioId = params.id;
+    const { id: studioId } = await params;
 
     if (!date) {
       return NextResponse.json(

@@ -173,7 +173,7 @@ const MOCK_STUDIOS = [
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -185,7 +185,7 @@ export async function GET(
       );
     }
 
-    const studioId = params.id;
+    const { id: studioId } = await params;
     const studio = MOCK_STUDIOS.find((s) => s.id === studioId);
 
     if (!studio) {

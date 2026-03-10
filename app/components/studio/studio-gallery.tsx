@@ -80,7 +80,7 @@ export default function StudioGallery({ studio }: StudioGalleryProps) {
         {/* Thumbnail Strip */}
         {images.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-2">
-            {images.map((image, index) => (
+            {images.map((image: string, index: number) => (
               <button
                 key={index}
                 onClick={() => setSelectedImageIndex(index)}

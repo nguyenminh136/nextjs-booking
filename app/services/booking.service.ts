@@ -18,6 +18,7 @@ const getBookings = async () => {
     });
 
     const data = await res.json();
+    console.log(data);
     return data;
   } catch (error: any) {
     console.error("Error fetching bookings:", error);

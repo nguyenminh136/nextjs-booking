@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { Studio } from "@/interface/Studio";
 import StudioGallery from "@/components/studio/studio-gallery";
 import StudioInfo from "@/components/studio/studio-info";
@@ -14,7 +13,6 @@ import { ArrowLeft } from "lucide-react";
 export default function StudioDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const { data: session } = useSession();
   const [studio, setStudio] = useState<Studio | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
