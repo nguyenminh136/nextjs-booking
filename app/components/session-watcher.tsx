@@ -16,7 +16,7 @@ export default function SessionWatcher() {
           position: "top-center",
           richColors: true,
           onAutoClose: () => {
-            signOut({ callbackUrl: "/login" });
+            signOut({ callbackUrl: "/auth/signin" });
           }
         });
       }
@@ -45,7 +45,7 @@ export default function SessionWatcher() {
                 position: "top-center",
                 richColors: true,
                 onAutoClose: () => {
-                  signOut({ callbackUrl: "/login" });
+                  signOut({ callbackUrl: "/auth/signin" });
                 }
               });
             }
