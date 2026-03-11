@@ -1,12 +1,36 @@
 import { AuthOptions } from "next-auth";
 import Auth0Provider from "next-auth/providers/auth0";
 
+// Determine NEXTAUTH_URL - use explicit setting or derive from Vercel environment
+const getNextAuthUrl = () => {
+  // Explicit NEXTAUTH_URL takes priority
+  if (process.env.NEXTAUTH_URL) {
+    return process.env.NEXTAUTH_URL;
+  }
+
+  // On Vercel, derive from VERCEL_URL if available
+  if (process.env.VERCEL_URL) {
+    const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'https';
+    return `${protocol}://${process.env.VERCEL_URL}`;
+  }
+
+  // Development fallback
+  if (process.env.NODE_ENV === 'development') {
+    return 'http://localhost:3000';
+  }
+
+  // Production fallback - this should rarely happen
+  console.error('[NextAuth] Unable to determine NEXTAUTH_URL. Set NEXTAUTH_URL environment variable.');
+  return 'http://localhost:3000';
+};
+
+const nextAuthUrl = getNextAuthUrl();
+
 // Validate required environment variables
 const requiredEnvVars = [
   "AUTH0_CLIENT_ID",
   "AUTH0_CLIENT_SECRET",
   "AUTH0_ISSUER",
-  "NEXTAUTH_URL",
   "NEXTAUTH_SECRET"
 ];
 
@@ -15,6 +39,8 @@ for (const envVar of requiredEnvVars) {
     console.warn(`[NextAuth] Missing required environment variable: ${envVar}`);
   }
 }
+
+console.log(`[NextAuth] Using NEXTAUTH_URL: ${nextAuthUrl}`);
 
 export const authOptions: AuthOptions = {
   providers: [
@@ -46,6 +72,13 @@ export const authOptions: AuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET,
   trustHost: true,
+  basePath: "/api/auth",
+  callbacks: {
+    async redirect({ url, baseUrl }) {
+      // Ensure redirects are to the same origin for security
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return baseUrl;
+    },
   callbacks: {
     async jwt({ token, account }) {
       if (account) {
