@@ -66,7 +66,7 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: "/login"
   },
-  session: { 
+  session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60 // 24 hours
   },
@@ -79,7 +79,6 @@ export const authOptions: AuthOptions = {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       return baseUrl;
     },
-  callbacks: {
     async jwt({ token, account }) {
       if (account) {
         token.expiresAt = Number(account.expires_at);
