@@ -1,37 +1,39 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export default function SessionWatcher() {
-  const supabase = createClient();
   const router = useRouter();
-  const checkingRef = useRef(false);
+  const tokenCheckRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     let isSubscribed = true;
 
-    // Subscribe to auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Check if token exists on mount
+    const checkToken = () => {
       if (!isSubscribed) return;
 
-      if (event === "SIGNED_OUT" || (!session && event !== "INITIAL_SESSION")) {
+      const token = localStorage.getItem("auth_token");
+      if (!token) {
         router.push("/auth/login");
-      } else if (event === "TOKEN_REFRESHED") {
-        console.log("Session refreshed");
       }
-    });
+    };
 
-    // Cleanup subscription
+    // Initial check
+    checkToken();
+
+    // Set up periodic token validation (every 5 minutes)
+    tokenCheckRef.current = setInterval(checkToken, 5 * 60 * 1000);
+
+    // Cleanup
     return () => {
       isSubscribed = false;
-      subscription?.unsubscribe();
+      if (tokenCheckRef.current) {
+        clearInterval(tokenCheckRef.current);
+      }
     };
-  }, [supabase, router]);
+  }, [router]);
 
   return null;
 }

@@ -1,45 +1,31 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useSearchParams, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { resetPassword } from '@/lib/api/auth'
+import type { ResetPasswordRequest } from '@/lib/api/types'
 
 export default function ResetPassword() {
   const router = useRouter()
-  const supabase = createClient()
+  const searchParams = useSearchParams()
+  const token = searchParams.get('token') || ''
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [isValidToken, setIsValidToken] = useState(false)
-  const [checkingSession, setCheckingSession] = useState(true)
-
-  useEffect(() => {
-    // Check if user has a valid password reset session
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user) {
-          setIsValidToken(true)
-        } else {
-          setError('Invalid or expired reset link. Please request a new one.')
-        }
-      } catch (err) {
-        setError('Error verifying reset link')
-      } finally {
-        setCheckingSession(false)
-      }
-    }
-
-    checkSession()
-  }, [supabase])
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
+
+    if (!token) {
+      setError('Invalid or missing reset token')
+      setLoading(false)
+      return
+    }
 
     if (!password || !confirmPassword) {
       setError('Both password fields are required')
@@ -53,35 +39,25 @@ export default function ResetPassword() {
       return
     }
 
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
       setLoading(false)
       return
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
+      const resetData: ResetPasswordRequest = {
+        token,
         password,
-      })
-
-      if (updateError) {
-        setError(updateError.message)
-      } else {
-        router.push('/auth/reset-success')
+        confirmPassword,
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      await resetPassword(resetData)
+      router.push('/auth/reset-success')
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred')
     } finally {
       setLoading(false)
     }
-  }
-
-  if (checkingSession) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-4">
-        <div className="text-white">Verifying reset link...</div>
-      </div>
-    )
   }
 
   return (
@@ -97,8 +73,7 @@ export default function ResetPassword() {
             </div>
           )}
 
-          {isValidToken && (
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
                   New Password
@@ -137,7 +112,6 @@ export default function ResetPassword() {
                 {loading ? 'Updating Password...' : 'Update Password'}
               </button>
             </form>
-          )}
 
           <p className="text-center text-slate-600 mt-6">
             <Link href="/auth/login" className="text-blue-600 hover:text-blue-700 font-semibold">

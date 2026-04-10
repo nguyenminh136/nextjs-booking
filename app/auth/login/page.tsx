@@ -3,11 +3,11 @@
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { login } from '@/lib/api/auth'
+import type { LoginRequest } from '@/lib/api/types'
 
 export default function Login() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -26,18 +26,11 @@ export default function Login() {
     }
 
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (signInError) {
-        setError(signInError.message)
-      } else {
-        router.push('/dashboard')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const loginData: LoginRequest = { email, password }
+      await login(loginData)
+      router.push('/dashboard')
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred')
     } finally {
       setLoading(false)
     }

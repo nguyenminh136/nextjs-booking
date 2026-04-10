@@ -3,11 +3,11 @@
 import { FormEvent, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { signUp } from '@/lib/api/auth'
+import type { SignUpRequest } from '@/lib/api/types'
 
 export default function SignUp() {
   const router = useRouter()
-  const supabase = createClient()
 
   const [formData, setFormData] = useState({
     email: '',
@@ -47,35 +47,26 @@ export default function SignUp() {
       return
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters')
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters')
       setLoading(false)
       return
     }
 
     try {
-      const { error: signUpError } = await supabase.auth.signUp({
+      const signUpData: SignUpRequest = {
         email: formData.email,
         password: formData.password,
-        options: {
-          emailRedirectTo:
-            process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL ||
-            `${window.location.origin}/auth/sign-up-success`,
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            role: formData.role,
-          },
-        },
-      })
-
-      if (signUpError) {
-        setError(signUpError.message)
-      } else {
-        router.push('/auth/sign-up-success')
+        confirmPassword: formData.confirmPassword,
+        role: formData.role,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+
+      await signUp(signUpData)
+      router.push('/auth/sign-up-success')
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred')
     } finally {
       setLoading(false)
     }

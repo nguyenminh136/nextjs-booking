@@ -2,11 +2,10 @@
 
 import { FormEvent, useState } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
+import { forgotPassword } from '@/lib/api/auth'
+import type { ForgotPasswordRequest } from '@/lib/api/types'
 
 export default function ForgotPassword() {
-  const supabase = createClient()
-
   const [email, setEmail] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -25,18 +24,12 @@ export default function ForgotPassword() {
     }
 
     try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`,
-      })
-
-      if (resetError) {
-        setError(resetError.message)
-      } else {
-        setSuccess(true)
-        setEmail('')
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred')
+      const resetData: ForgotPasswordRequest = { email }
+      await forgotPassword(resetData)
+      setSuccess(true)
+      setEmail('')
+    } catch (err: any) {
+      setError(err?.message || 'An error occurred')
     } finally {
       setLoading(false)
     }

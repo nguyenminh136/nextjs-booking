@@ -2,52 +2,31 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import LogoutButton from '@/app/components/logout-button'
-
-interface User {
-  id: string
-  email: string
-  role: 'user' | 'studio_owner' | 'admin'
-  first_name: string | null
-  last_name: string | null
-}
+import { getMe } from '@/lib/api/auth'
+import type { User } from '@/lib/api/types'
 
 export default function Dashboard() {
   const router = useRouter()
-  const supabase = createClient()
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const [authUser, setAuthUser] = useState<any>(null)
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession()
+        const token = localStorage.getItem('auth_token')
 
-        if (!session) {
+        if (!token) {
           router.push('/auth/login')
           return
         }
 
-        setAuthUser(session.user)
-
-        // Fetch user profile from public.users table
-        const { data, error } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', session.user.id)
-          .single()
-
-        if (error) {
-          console.error('Error fetching user:', error)
-        } else {
-          setUser(data)
-        }
-      } catch (err) {
+        // Fetch current user from API
+        const response = await getMe()
+        setUser(response.user)
+      } catch (err: any) {
         console.error('Auth check error:', err)
+        localStorage.removeItem('auth_token')
         router.push('/auth/login')
       } finally {
         setLoading(false)
@@ -55,7 +34,7 @@ export default function Dashboard() {
     }
 
     checkAuth()
-  }, [router, supabase])
+  }, [router])
 
   if (loading) {
     return (
@@ -65,11 +44,11 @@ export default function Dashboard() {
     )
   }
 
-  if (!user || !authUser) {
+  if (!user) {
     return null
   }
 
-  const displayName = user.first_name || user.last_name ? `${user.first_name || ''} ${user.last_name || ''}`.trim() : authUser.email
+  const displayName = user.firstName || user.lastName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : user.email
 
   const getRoleDisplay = (role: string) => {
     const roleMap: Record<string, string> = {
