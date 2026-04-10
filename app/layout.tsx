@@ -5,7 +5,7 @@ import SessionWatcher from "@/components/session-watcher";
 import { inter, spaceGrotesk } from "./fonts";
 import { StoreProvider } from "./StoreProvider";
 import QueryProvider from "./QueryProvider";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import ServiceWorkerRegister from "./components/service-worker-register";
 
 import "./globals.css";
@@ -13,7 +13,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "NextJS Booking",
   description: "A progressive booking platform",
-  manifest: "/manifest.json",
+  manifest: "/manifest.json"
+};
+
+export const viewport: Viewport = {
   themeColor: "#0070f3"
 };
 
