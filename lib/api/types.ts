@@ -13,6 +13,7 @@ export interface User {
   isEmailVerified: boolean;
   createdAt: string;
   updatedAt: string;
+  is_email_verified: boolean;
 }
 
 export interface AuthResponse {
