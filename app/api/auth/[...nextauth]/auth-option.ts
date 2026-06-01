@@ -35,7 +35,6 @@ export const authOptions: AuthOptions = {
       if (token.expiresAt && Date.now() / 1000 > Number(token.expiresAt)) {
         token.error = "AccessTokenExpired";
       }
-      console.log("token:", token);
       return token;
     },
     async session({ session, token }) {

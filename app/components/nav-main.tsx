@@ -17,16 +17,20 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem
 } from "@/components/ui/sidebar";
-import { NavItem, setActive } from "@/lib/features/navigation/sideBarSlice";
-import { useAppDispatch } from "@/lib/hooks";
+import {
+  selectNavMain,
+  setActive
+} from "@/lib/features/navigation/sideBarSlice";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { DynamicIcon } from "./dynamic-icon";
 
-export function NavMain({ items }: { items: NavItem[] }) {
+export function NavMain() {
   const dispatch = useAppDispatch();
+  const navMain = useAppSelector(selectNavMain);
   return (
     <SidebarGroup>
       <SidebarMenu>
-        {items.map(item =>
+        {navMain.map(item =>
           item.items ? (
             <Collapsible
               key={item.title}

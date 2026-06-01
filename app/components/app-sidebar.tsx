@@ -1,7 +1,4 @@
-"use client";
-
 import * as React from "react";
-import { useSession } from "next-auth/react";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
@@ -12,26 +9,18 @@ import {
   SidebarHeader,
   SidebarRail
 } from "@/components/ui/sidebar";
-import { useAppSelector } from "@/lib/hooks";
-import {
-  selectNavMain,
-  selectTeams
-} from "@/lib/features/navigation/sideBarSlice";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession();
-  const navMain = useAppSelector(selectNavMain);
-  const teams = useAppSelector(selectTeams);
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <TeamSwitcher teams={teams} />
+        <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session?.user || {}} />
+        <NavUser />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

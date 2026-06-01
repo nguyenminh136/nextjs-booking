@@ -18,13 +18,14 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/sidebar";
-import { Team } from "@/lib/features/navigation/sideBarSlice";
+import { selectTeams } from "@/lib/features/navigation/sideBarSlice";
 import { DynamicIcon } from "./dynamic-icon";
+import { useAppSelector } from "@/lib/hooks";
 
-export function TeamSwitcher({ teams }: { teams: Team[] }) {
+export function TeamSwitcher() {
   const { isMobile } = useSidebar();
+  const teams = useAppSelector(selectTeams);
   const [activeTeam, setActiveTeam] = React.useState(teams[0]);
-
   if (!activeTeam) {
     return null;
   }

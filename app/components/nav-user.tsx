@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 
 import { User } from "next-auth";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -29,9 +29,10 @@ import {
   useSidebar
 } from "@/components/ui/sidebar";
 
-export function NavUser({ user }: { user: User }) {
+export function NavUser() {
   const { isMobile } = useSidebar();
-
+  const { data: session } = useSession();
+  const user: User = session?.user || {};
   return (
     <SidebarMenu>
       <SidebarMenuItem>
