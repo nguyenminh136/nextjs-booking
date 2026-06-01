@@ -28,8 +28,12 @@ export default function BookingCard({ booking }: { booking: Booking }) {
       <CardContent className="pt-2">
         <div className="flex flex-col text-sm text-gray-600 space-y-1">
           <span>
-            <strong>Time:</strong> {format(new Date(booking.startTime), "dd MMM yyyy HH:mm")} –{" "}
-            {format(new Date(booking.endTime), "HH:mm")}
+            <strong>Date:</strong>{" "}
+            {format(new Date(booking.date), "dd MMM yyyy")}
+          </span>
+          <span>
+            <strong>Time:</strong> {booking.startTime.slice(0, 5)} –{" "}
+            {booking.endTime.slice(0, 5)}
           </span>
           <span>
             <strong>Status:</strong> {booking.status}

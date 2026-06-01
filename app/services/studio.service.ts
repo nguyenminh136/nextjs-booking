@@ -40,24 +40,27 @@ const getStudios = async (
     if (filters?.location) params.append("location", filters.location);
     if (filters?.city) params.append("city", filters.city);
     if (filters?.radius) params.append("radius", filters.radius.toString());
-    if (filters?.capacity) params.append("capacity", filters.capacity.toString());
+    if (filters?.capacity)
+      params.append("capacity", filters.capacity.toString());
     if (filters?.equipment && filters.equipment.length)
       params.append("equipment", filters.equipment.join(","));
-    if (filters?.priceMin) params.append("priceMin", filters.priceMin.toString());
-    if (filters?.priceMax) params.append("priceMax", filters.priceMax.toString());
+    if (filters?.priceMin)
+      params.append("priceMin", filters.priceMin.toString());
+    if (filters?.priceMax)
+      params.append("priceMax", filters.priceMax.toString());
     if (filters?.availabilityDate)
       params.append("availabilityDate", filters.availabilityDate);
     params.append("page", (filters?.page || 1).toString());
     params.append("limit", (filters?.limit || 12).toString());
 
     const res = await fetch(
-      `${process.env.API_URL}/studios?${params.toString()}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/studios?${params.toString()}`,
       {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-        cache: "no-store",
+        cache: "no-store"
       }
     );
 

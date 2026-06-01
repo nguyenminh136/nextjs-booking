@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { format, addDays, startOfDay } from "date-fns";
+import { useSession } from "next-auth/react";
 
 interface TimeSlot {
   time: string;
@@ -34,6 +35,7 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
   const [isLoading, setIsLoading] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const { data: session } = useSession();
 
   // Fetch availability when date or granularity changes
   useEffect(() => {
@@ -122,9 +124,25 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
         return;
       }
 
-      // Show success message
-      alert(`Successfully booked: ${format(selectedDate, "MMM d, yyyy")} at ${selectedSlot}\n\nLock ID: ${validationResult.lockId}`);
-      setSelectedSlot(null);
+      console.log("Validation successful, proceeding to book with lock ID:", validationResult.lockId);
+      const addResult = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studioId,
+          status: "pending",
+          userEmail: session?.user?.email || "unknown",
+          date: selectedDate,
+          startTime: selectedSlot,
+          endTime: endTime,
+        }),
+      });
+      if (addResult.ok) {
+        alert(`Successfully booked: ${format(selectedDate, "MMM d, yyyy")} at ${selectedSlot}\n\nLock ID: ${validationResult.lockId}`);
+        setSelectedSlot(null);
+      }
     } catch (error) {
       console.error("Error booking slot:", error);
       setBookingError("Failed to book slot. Please try again.");
