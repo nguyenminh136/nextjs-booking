@@ -8,7 +8,6 @@ import QueryProvider from "./providers/query-provider";
 import type { Metadata } from "next";
 import ServiceWorkerRegister from "./components/service-worker-register";
 
-// @ts-ignore: global CSS import type declarations are handled by Next.js
 import "./globals.css";
 
 export const metadata: Metadata = {
