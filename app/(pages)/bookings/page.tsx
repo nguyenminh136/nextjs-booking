@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import BookingsList from "@/components/booking/booking-list";
+import { BookingCardListSkeleton } from "@/components/skeletons/booking-card-list.skeleton";
 
-export default function BookingsPage() {
+export default async function BookingsPage() {
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
@@ -13,7 +15,9 @@ export default function BookingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <BookingsList />
+        <Suspense fallback={<BookingCardListSkeleton />}>
+          <BookingsList />
+        </Suspense>
       </div>
     </div>
   );
