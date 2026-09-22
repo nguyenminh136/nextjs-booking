@@ -1,0 +1,72 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Validate and deploy production
+    runs-on: ubuntu-latest
+    environment: production
+
+    env:
+      # These authenticate the deployment only; application secrets stay in Vercel.
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Run TypeScript check
+        run: pnpm exec tsc --noEmit
+
+      - name: Run tests
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.test ? 0 : 1)"; then
+            pnpm test
+          else
+            echo "No test script configured; skipping tests."
+          fi
+
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@41.7.3
+
+      - name: Pull Vercel production configuration
+        # This imports Vercel-managed production environment variables for the build.
+        # Do not add application secrets to this workflow or GitHub Secrets.
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+
+      - name: Build with Vercel
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+
+      - name: Deploy prebuilt application to Vercel
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
