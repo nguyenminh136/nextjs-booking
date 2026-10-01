@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
 import { format, addDays, startOfDay } from "date-fns";
-import { useSession } from "next-auth/react";
 
 interface TimeSlot {
   time: string;
@@ -35,7 +34,6 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
   const [isLoading, setIsLoading] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
-  const { data: session } = useSession();
 
   // Fetch availability when date or granularity changes
   useEffect(() => {
@@ -93,8 +91,7 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
       const endHours = hours + Math.floor(endMinutes / 60);
       const endTime = `${String(endHours).padStart(2, "0")}:${String(endMinutes % 60).padStart(2, "0")}`;
 
-      // Validate booking against current state
-      const response = await fetch("/api/bookings/validate", {
+      const response = await fetch("/api/bookings", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -107,42 +104,27 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
         }),
       });
 
-      const validationResult = await response.json();
+      if (!response.ok) {
+        const responseData: unknown = await response.json().catch(() => null);
+        const errorMessage =
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "error" in responseData &&
+          typeof responseData.error === "string"
+            ? responseData.error
+            : "Failed to create booking";
 
-      if (!validationResult.valid) {
-        setBookingError(validationResult.message);
-        // Refresh availability to show updated bookings
-        const dateStr = format(selectedDate, "yyyy-MM-dd");
-        const params = new URLSearchParams();
-        params.append("date", dateStr);
-        params.append("granularity", granularity);
-        const refreshResponse = await fetch(
-          `/api/studios/${studioId}/availability?${params.toString()}`
-        );
-        const refreshData = await refreshResponse.json();
-        setAvailability(refreshData);
+        if (response.status === 409) {
+          setBookingError("This time slot is no longer available. Please select another slot.");
+          setSelectedSlot(null);
+        } else {
+          setBookingError(errorMessage);
+        }
         return;
       }
 
-      console.log("Validation successful, proceeding to book with lock ID:", validationResult.lockId);
-      const addResult = await fetch("/api/bookings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          studioId,
-          status: "pending",
-          userEmail: session?.user?.email || "unknown",
-          date: selectedDate,
-          startTime: selectedSlot,
-          endTime: endTime,
-        }),
-      });
-      if (addResult.ok) {
-        alert(`Successfully booked: ${format(selectedDate, "MMM d, yyyy")} at ${selectedSlot}\n\nLock ID: ${validationResult.lockId}`);
-        setSelectedSlot(null);
-      }
+      alert(`Successfully booked: ${format(selectedDate, "MMM d, yyyy")} at ${selectedSlot}`);
+      setSelectedSlot(null);
     } catch (error) {
       console.error("Error booking slot:", error);
       setBookingError("Failed to book slot. Please try again.");
@@ -292,7 +274,7 @@ export default function StudioAvailability({ studioId }: StudioAvailabilityProps
 
       {/* Note */}
       <p className="text-xs text-gray-500 text-center">
-        Confirmation required via email
+        Displayed slots are estimates; the booking service confirms availability when you reserve.
       </p>
     </Card>
   );

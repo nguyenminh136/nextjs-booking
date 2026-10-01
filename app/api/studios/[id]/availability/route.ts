@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
 import { NextRequest, NextResponse } from "next/server";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 
 // Mock bookings data - in production, this would come from database
 const MOCK_BOOKINGS = [
@@ -81,9 +80,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.accessToken) {
+    if (!(await getServerAccessToken())) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }

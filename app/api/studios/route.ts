@@ -1,7 +1,6 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
 import { NextRequest, NextResponse } from "next/server";
 import { Studio } from "@/interface/Studio";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 
 // Mock data for studios - in production, this would come from a database
 const MOCK_STUDIOS: Studio[] = [
@@ -109,9 +108,7 @@ const MOCK_STUDIOS: Studio[] = [
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.accessToken) {
+    if (!(await getServerAccessToken())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

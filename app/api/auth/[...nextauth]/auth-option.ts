@@ -38,7 +38,6 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
       session.expiresAt = token.expiresAt as number;
       session.error = token.error as string | undefined;
       return session;

@@ -8,29 +8,31 @@ if (workbox) {
   // Precaching các asset được build (Next.js static chunks, css, v.v)
   workbox.precaching.precacheAndRoute(self.__WB_MANIFEST);
 
+  // Remove navigation and broad asset caches created by older worker versions.
+  self.addEventListener("activate", (event) => {
+    event.waitUntil(
+      Promise.all([caches.delete("pages-cache"), caches.delete("assets-cache")])
+    );
+  });
+
   workbox.routing.registerRoute(
     ({ url }) => url.pathname.endsWith("manifest.json"),
     new workbox.strategies.NetworkOnly()
   );
 
-  // Cache các trang HTML (App Router)
+  // Navigation responses can contain authenticated or user-specific content.
+  // Always use the network; the catch handler below only serves a generic page.
   workbox.routing.registerRoute(
     ({ request }) => request.mode === "navigate",
-    new workbox.strategies.NetworkFirst({
-      cacheName: "pages-cache",
-      networkTimeoutSeconds: 3,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50
-        })
-      ]
-    })
+    new workbox.strategies.NetworkOnly()
   );
 
-  // Cache static assets (images, fonts, js, css)
+  // Cache only immutable, same-origin build assets; never cache API or user media.
   workbox.routing.registerRoute(
-    ({ request }) =>
-      ["style", "script", "image", "font"].includes(request.destination),
+    ({ url, request }) =>
+      url.origin === self.location.origin &&
+      url.pathname.startsWith("/_next/static/") &&
+      ["style", "script", "font"].includes(request.destination),
     new workbox.strategies.StaleWhileRevalidate({
       cacheName: "assets-cache"
     })
@@ -40,11 +42,13 @@ if (workbox) {
   workbox.routing.setCatchHandler(async ({ event }) => {
     if (event.request.destination === "document") {
       const cachedResponse = await caches.match("/offline.html");
-      console.log(cachedResponse);
       if (cachedResponse) return cachedResponse;
 
       return new Response("<h1>Offline</h1><p>No cached page found.</p>", {
-        headers: { "Content-Type": "text/html" }
+        headers: {
+          "Cache-Control": "no-store",
+          "Content-Type": "text/html"
+        }
       });
     }
     return Response.error();

@@ -1,60 +1,101 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useSession } from "next-auth/react";
+import type { CreateBookingInput } from "@/bookings/booking-schema";
 
 export default function NewBookingPage() {
-  const { data: session } = useSession();
-  const [form, setForm] = useState({
-    studioName: "",
-    customerName: "",
+  const [form, setForm] = useState<CreateBookingInput>({
+    studioId: "",
+    date: "",
     startTime: "",
     endTime: ""
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isCreated, setIsCreated] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    setError(null);
+    setIsCreated(false);
 
-    await fetch("/api/bookings", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${session?.accessToken}`
-      },
-      body: JSON.stringify(form)
-    });
+    try {
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(form)
+      });
 
-    alert("Booking created!");
+      if (!response.ok) {
+        const responseData: unknown = await response.json().catch(() => null);
+        const errorMessage =
+          typeof responseData === "object" &&
+          responseData !== null &&
+          "error" in responseData &&
+          typeof responseData.error === "string"
+            ? responseData.error
+            : "Failed to create booking";
+        setError(errorMessage);
+        return;
+      }
+
+      setIsCreated(true);
+    } catch {
+      setError("Booking service is unavailable. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-md">
-      <h1 className="text-xl font-semibold mb-4">Create a new booking</h1>
+    <div className="mx-auto max-w-md rounded-2xl bg-white p-6 shadow-md">
+      <h1 className="mb-4 text-xl font-semibold">Create a new booking</h1>
       <form onSubmit={handleSubmit} className="space-y-3">
         <Input
-          placeholder="Studio name"
-          value={form.studioName}
-          onChange={e => setForm({ ...form, studioName: e.target.value })}
+          aria-label="Studio ID"
+          placeholder="Studio ID"
+          required
+          value={form.studioId}
+          onChange={event => setForm({ ...form, studioId: event.target.value })}
         />
         <Input
-          placeholder="Customer name"
-          value={form.customerName}
-          onChange={e => setForm({ ...form, customerName: e.target.value })}
+          aria-label="Booking date"
+          type="date"
+          required
+          value={form.date}
+          onChange={event => setForm({ ...form, date: event.target.value })}
         />
         <Input
-          type="datetime-local"
+          aria-label="Start time"
+          type="time"
+          required
           value={form.startTime}
-          onChange={e => setForm({ ...form, startTime: e.target.value })}
+          onChange={event => setForm({ ...form, startTime: event.target.value })}
         />
         <Input
-          type="datetime-local"
+          aria-label="End time"
+          type="time"
+          required
           value={form.endTime}
-          onChange={e => setForm({ ...form, endTime: e.target.value })}
+          onChange={event => setForm({ ...form, endTime: event.target.value })}
         />
-        <Button type="submit" className="w-full">
-          Submit
+        {error && (
+          <p role="alert" className="text-sm text-red-600">
+            {error}
+          </p>
+        )}
+        {isCreated && (
+          <p role="status" className="text-sm text-green-700">
+            Booking created.
+          </p>
+        )}
+        <Button type="submit" className="w-full" disabled={isSubmitting}>
+          {isSubmitting ? "Creating booking..." : "Create booking"}
         </Button>
       </form>
     </div>

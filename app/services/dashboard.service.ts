@@ -1,10 +1,9 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 
 const getRevenue = async () => {
-  const session = await getServerSession(authOptions);
+  const accessToken = await getServerAccessToken();
   
-    if (!session?.accessToken) {
+    if (!accessToken) {
       throw new Error("Unauthorized: missing access token");
     }
   

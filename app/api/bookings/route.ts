@@ -1,25 +1,63 @@
+import { createBookingSchema } from "@/bookings/booking-schema";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 import { addBooking } from "@/services/booking.service";
+import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { authOptions } from "../auth/[...nextauth]/auth-option";
-import { getServerSession } from "next-auth";
 
-export async function POST( request: Request): Promise<NextResponse> {
+export async function POST(request: Request): Promise<NextResponse> {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.accessToken) {
+    if (!(await getServerAccessToken())) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const requestData = await request.json();
-    const data = await addBooking(requestData);
-    if (data && !data.error) {
-      return NextResponse.json(data);
-    } else {
-      return NextResponse.json({ error: data?.error || "Failed to create booking" }, { status: 400 });
+
+    const session = await getServerSession(authOptions);
+    const userEmail = session?.user?.email;
+    if (!userEmail) {
+      return NextResponse.json(
+        { error: "An email address is required to create a booking" },
+        { status: 422 }
+      );
     }
-  } catch (error: any) {
+
+    let requestData: unknown;
+    try {
+      requestData = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Request body must be valid JSON" },
+        { status: 400 }
+      );
+    }
+
+    const bookingInput = createBookingSchema.safeParse(requestData);
+    if (!bookingInput.success) {
+      return NextResponse.json(
+        {
+          error: "Invalid booking details",
+          details: bookingInput.error.flatten()
+        },
+        { status: 400 }
+      );
+    }
+
+    const result = await addBooking(bookingInput.data, userEmail);
+    if (!result.ok) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: result.status }
+      );
+    }
+
+    if (result.status === 204) {
+      return new NextResponse(null, { status: 204 });
+    }
+
+    return NextResponse.json(result.data, { status: result.status });
+  } catch (error: unknown) {
+    console.error("Error creating booking:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to create booking" },
+      { error: "Failed to create booking" },
       { status: 500 }
     );
   }

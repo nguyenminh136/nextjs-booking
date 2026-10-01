@@ -1,6 +1,5 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
 import { Studio } from "@/interface/Studio";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 
 export interface StudioSearchFilters {
   search?: string;
@@ -28,9 +27,9 @@ const getStudios = async (
   filters?: StudioSearchFilters
 ): Promise<SearchResponse | { error: string; status: number }> => {
   try {
-    const session = await getServerSession(authOptions);
+    const accessToken = await getServerAccessToken();
 
-    if (!session?.accessToken) {
+    if (!accessToken) {
       return { error: "Unauthorized missing token", status: 401 };
     }
 
@@ -54,10 +53,10 @@ const getStudios = async (
     params.append("limit", (filters?.limit || 12).toString());
 
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/studios?${params.toString()}`,
+      `${process.env.API_URL}/studios?${params.toString()}`,
       {
         headers: {
-          Authorization: `Bearer ${session.accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
         cache: "no-store"

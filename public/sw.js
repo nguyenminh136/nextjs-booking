@@ -8,29 +8,31 @@ if (workbox) {
   // Precaching các asset được build (Next.js static chunks, css, v.v)
   workbox.precaching.precacheAndRoute([{"revision":"dc987e0001f82b22cb155959e09e2570","url":"/default-avatar.png"},{"revision":"d09f95206c3fa0bb9bd9fefabfd0ea71","url":"/file.svg"},{"revision":"2aaafa6a49b6563925fe440891e32717","url":"/globe.svg"},{"revision":"7bd117f74aa9053658f52511eba897e8","url":"/icons/icon-192x192.png"},{"revision":"5f7be61de73d670998fce7b76016ce39","url":"/icons/icon-512x512.png"},{"revision":"f46713c8acec95daabdbec338dfd9bd2","url":"/manifest.json"},{"revision":"8e061864f388b47f33a1c3780831193e","url":"/next.svg"},{"revision":"665b7c78aa1d5c6f87e39e6639baf2be","url":"/offline.html"},{"revision":"35707bd9960ba5281c72af927b79291f","url":"/placeholder.svg"},{"revision":"4779d676e53a7384ed487d69d95831bc","url":"/slotspace_leaf_icon.svg"},{"revision":"c0af2f507b369b085b35ef4bbe3bcf1e","url":"/vercel.svg"},{"revision":"a2760511c65806022ad20adf74370ff3","url":"/window.svg"},{"revision":"cbc9313050e0cafd6272edd439e4a716","url":"/workers/heavy-worker.js"}]);
 
+  // Remove navigation and broad asset caches created by older worker versions.
+  self.addEventListener("activate", (event) => {
+    event.waitUntil(
+      Promise.all([caches.delete("pages-cache"), caches.delete("assets-cache")])
+    );
+  });
+
   workbox.routing.registerRoute(
     ({ url }) => url.pathname.endsWith("manifest.json"),
     new workbox.strategies.NetworkOnly()
   );
 
-  // Cache các trang HTML (App Router)
+  // Navigation responses can contain authenticated or user-specific content.
+  // Always use the network; the catch handler below only serves a generic page.
   workbox.routing.registerRoute(
     ({ request }) => request.mode === "navigate",
-    new workbox.strategies.NetworkFirst({
-      cacheName: "pages-cache",
-      networkTimeoutSeconds: 3,
-      plugins: [
-        new workbox.expiration.ExpirationPlugin({
-          maxEntries: 50
-        })
-      ]
-    })
+    new workbox.strategies.NetworkOnly()
   );
 
-  // Cache static assets (images, fonts, js, css)
+  // Cache only immutable, same-origin build assets; never cache API or user media.
   workbox.routing.registerRoute(
-    ({ request }) =>
-      ["style", "script", "image", "font"].includes(request.destination),
+    ({ url, request }) =>
+      url.origin === self.location.origin &&
+      url.pathname.startsWith("/_next/static/") &&
+      ["style", "script", "font"].includes(request.destination),
     new workbox.strategies.StaleWhileRevalidate({
       cacheName: "assets-cache"
     })
@@ -40,11 +42,13 @@ if (workbox) {
   workbox.routing.setCatchHandler(async ({ event }) => {
     if (event.request.destination === "document") {
       const cachedResponse = await caches.match("/offline.html");
-      console.log(cachedResponse);
       if (cachedResponse) return cachedResponse;
 
       return new Response("<h1>Offline</h1><p>No cached page found.</p>", {
-        headers: { "Content-Type": "text/html" }
+        headers: {
+          "Cache-Control": "no-store",
+          "Content-Type": "text/html"
+        }
       });
     }
     return Response.error();

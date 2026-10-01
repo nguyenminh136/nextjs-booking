@@ -1,17 +1,16 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/api/auth/[...nextauth]/auth-option";
-import { Booking } from "@/interface/Booking";
+import type { CreateBookingInput } from "@/bookings/booking-schema";
+import { getServerAccessToken } from "@/lib/auth/get-server-access-token";
 
 const getBookings = async () => {
   try {
-    const session = await getServerSession(authOptions);
+    const accessToken = await getServerAccessToken();
 
-    if (!session?.accessToken) {
+    if (!accessToken) {
       return { error: "Unauthorized missing token", status: 401 };
     }
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
+    const res = await fetch(`${process.env.API_URL}/bookings`, {
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json"
       },
       cache: "no-store"
@@ -25,28 +24,86 @@ const getBookings = async () => {
   }
 };
 
-const addBooking = async (bookingData: Booking) => {
-  try {
-    const session = await getServerSession(authOptions);
+type AddBookingResult =
+  | { ok: true; status: number; data: unknown }
+  | { ok: false; status: number; error: string };
 
-    if (!session?.accessToken) {
-      return { error: "Unauthorized missing token", status: 401 };
+function getErrorMessage(data: unknown): string | null {
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "error" in data &&
+    typeof data.error === "string"
+  ) {
+    return data.error;
+  }
+
+  if (
+    typeof data === "object" &&
+    data !== null &&
+    "message" in data &&
+    typeof data.message === "string"
+  ) {
+    return data.message;
+  }
+
+  return null;
+}
+
+const addBooking = async (
+  bookingData: CreateBookingInput,
+  userEmail: string
+): Promise<AddBookingResult> => {
+  try {
+    const accessToken = await getServerAccessToken();
+
+    if (!accessToken) {
+      return { ok: false, error: "Unauthorized", status: 401 };
     }
 
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/bookings`, {
+    const apiUrl = process.env.API_URL;
+    if (!apiUrl) {
+      console.error("Booking API URL is not configured");
+      return { ok: false, error: "Booking service is unavailable", status: 500 };
+    }
+
+    const res = await fetch(`${apiUrl}/bookings`, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${session.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(bookingData)
+      body: JSON.stringify({
+        ...bookingData,
+        status: "pending",
+        userEmail
+      })
     });
 
-    const data = await res.json();
-    return data;
-  } catch (error: any) {
+    let data: unknown = null;
+    if (res.status !== 204) {
+      const responseText = await res.text();
+      if (responseText) {
+        try {
+          data = JSON.parse(responseText) as unknown;
+        } catch {
+          data = responseText;
+        }
+      }
+    }
+
+    if (!res.ok) {
+      return {
+        ok: false,
+        error: getErrorMessage(data) ?? "Failed to create booking",
+        status: res.status
+      };
+    }
+
+    return { ok: true, data, status: res.status };
+  } catch (error: unknown) {
     console.error("Error adding booking:", error);
-    return { error: error.message || "Failed to add booking", status: 500 };
+    return { ok: false, error: "Booking service is unavailable", status: 502 };
   }
 };
 
